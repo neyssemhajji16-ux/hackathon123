@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudySquad AI — Your Virtual Study Group</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👥</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/styles/main.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- LANDING PAGE -->
+    <div id="landing-page" class="page active">
+      <div class="landing-bg">
+        <div class="grid-overlay"></div>
+      </div>
+      <nav class="landing-nav">
+        <div class="logo">Study<span>Squad</span></div>
+        <div class="nav-tagline">AI-Powered Virtual Study Group</div>
+      </nav>
+      <div class="landing-hero">
+        <div class="hero-badge">🏆 Hackathon Edition</div>
+        <h1 class="hero-title">Your AI study group,<br><em>always ready.</em></h1>
+        <p class="hero-sub">Khanmigo gives you a tutor. Socratic gives you answers.<br><strong>StudySquad gives you a crew.</strong></p>
+        <div class="hero-agents">
+          <div class="ha" style="--c:#7c6fff">🧠<span>Alex</span></div>
+          <div class="ha" style="--c:#43e8b0">🤔<span>Sam</span></div>
+          <div class="ha" style="--c:#ff6b9d">🧐<span>Jordan</span></div>
+          <div class="ha" style="--c:#ffc54d">📋<span>Maya</span></div>
+          <div class="ha" style="--c:#ff9f43">🎯<span>Quinn</span></div>
+          <div class="ha" style="--c:#64d9ff">📝<span>Nova</span></div>
+        </div>
+        <button class="cta-btn" onclick="App.showSetup()">Enter Study Room →</button>
+      </div>
+      <div class="landing-features">
+        <div class="lf-card">
+          <div class="lf-icon">⚡</div>
+          <div class="lf-title">Adaptive AI</div>
+          <div class="lf-desc">System detects when you're struggling and switches to Deep Understanding Mode automatically</div>
+        </div>
+        <div class="lf-card">
+          <div class="lf-icon">🧪</div>
+          <div class="lf-title">Feynman Method</div>
+          <div class="lf-desc">Sam asks you to explain concepts — the AI evaluates your explanation and fills the gaps</div>
+        </div>
+        <div class="lf-card">
+          <div class="lf-icon">📄</div>
+          <div class="lf-title">Your Own Notes</div>
+          <div class="lf-desc">Upload your PDF lecture notes — agents discuss YOUR content, not Wikipedia</div>
+        </div>
+        <div class="lf-card">
+          <div class="lf-icon">⏱️</div>
+          <div class="lf-title">Pomodoro Built-in</div>
+          <div class="lf-desc">25-min focus cycles with the group reacting to your streak and discipline</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETUP PAGE -->
+    <div id="setup-page" class="page">
+      <div class="setup-container">
+        <button class="back-btn" onclick="App.showLanding()">← Back</button>
+        <div class="setup-header">
+          <h2>Setup Your Session</h2>
+          <p>Configure your study group before entering the room</p>
+        </div>
+        <div class="setup-form">
+          <div class="form-group">
+            <label>Study Topic <span class="req">*</span></label>
+            <input type="text" id="topic-input" placeholder="e.g. Photosynthesis, Binary Search, World War I..." />
+          </div>
+          <div class="form-group">
+            <label>Upload Lecture Notes <span class="opt">(optional but recommended)</span></label>
+            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+              <div class="upload-icon">📄</div>
+              <div class="upload-text">Click to upload PDF or drag & drop</div>
+              <div class="upload-hint">Max 5MB — text will be extracted and given to agents</div>
+            </div>
+            <input type="file" id="file-input" accept=".pdf,.txt" style="display:none" onchange="App.handleFileUpload(event)" />
+            <div id="file-status" class="file-status" style="display:none"></div>
+          </div>
+          <div class="form-group">
+            <label>Active Agents</label>
+            <div class="agent-toggles">
+              <div class="at-item on" data-agent="genius"><span>🧠</span> Alex — Genius</div>
+              <div class="at-item on" data-agent="confused"><span>🤔</span> Sam — Confused</div>
+              <div class="at-item on" data-agent="skeptic"><span>🧐</span> Jordan — Skeptic</div>
+              <div class="at-item on" data-agent="organizer"><span>📋</span> Maya — Organizer</div>
+              <div class="at-item on" data-agent="quiz"><span>🎯</span> Quinn — Quiz Master</div>
+              <div class="at-item on" data-agent="summarizer"><span>📝</span> Nova — Summarizer</div>
+            </div>
+          </div>
+          <button class="start-session-btn" onclick="App.startSession()">
+            Enter Study Room 🚀
+          </button>
+          <div id="setup-error" class="setup-error" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDY ROOM PAGE -->
+    <div id="room-page" class="page">
+
+      <!-- TOP BAR -->
+      <header class="room-header">
+        <div class="rh-left">
+          <div class="logo-sm">Study<span>Squad</span></div>
+          <div class="topic-chip" id="header-topic">—</div>
+          <div class="mode-badge" id="mode-badge">Normal Mode</div>
+        </div>
+        <div class="rh-center">
+          <div class="pomo-timer" id="pomo-display" onclick="Pomodoro.toggle()">
+            <svg width="36" height="36" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="#1f2038" stroke-width="3"/>
+              <circle id="pomo-arc" cx="18" cy="18" r="15" fill="none" stroke="#7c6fff" stroke-width="3"
+                stroke-dasharray="94.2" stroke-dashoffset="0" stroke-linecap="round"
+                transform="rotate(-90 18 18)"/>
+            </svg>
+            <span id="pomo-time-txt">25:00</span>
+            <span id="pomo-phase-txt">Study</span>
+          </div>
+        </div>
+        <div class="rh-right">
+          <div class="streak-badge"><span>🔥</span> <span id="streak-display">0</span> streak</div>
+          <div class="score-badge">Score: <span id="score-display">—</span></div>
+          <button class="sound-btn" id="sound-btn" onclick="App.toggleSound()" title="Mute AI Voices">🔊</button>
+          <button class="end-btn" onclick="App.endSession()">End Session</button>
+        </div>
+      </header>
+
+      <!-- MAIN ROOM -->
+      <div class="room-main">
+
+        <!-- AVATAR RING (Study Table) -->
+        <div class="study-table-wrap panel-glass">
+          <div class="study-table">
+            <div class="table-surface">
+              <div class="table-label">📚 StudySquad</div>
+            </div>
+            <!-- Avatars positioned around table -->
+            <div class="avatar-seat" id="av-genius" style="--angle:0deg;--c:#7c6fff">
+              <div class="av-glow"></div>
+              <div class="av-body">🧠</div>
+              <div class="av-name">Alex</div>
+              <div class="av-bubble" id="bubble-genius">thinking…</div>
+            </div>
+            <div class="avatar-seat" id="av-confused" style="--angle:60deg;--c:#43e8b0">
+              <div class="av-glow"></div>
+              <div class="av-body">🤔</div>
+              <div class="av-name">Sam</div>
+              <div class="av-bubble" id="bubble-confused">thinking…</div>
+            </div>
+            <div class="avatar-seat" id="av-skeptic" style="--angle:120deg;--c:#ff6b9d">
+              <div class="av-glow"></div>
+              <div class="av-body">🧐</div>
+              <div class="av-name">Jordan</div>
+              <div class="av-bubble" id="bubble-skeptic">thinking…</div>
+            </div>
+            <div class="avatar-seat" id="av-organizer" style="--angle:180deg;--c:#ffc54d">
+              <div class="av-glow"></div>
+              <div class="av-body">📋</div>
+              <div class="av-name">Maya</div>
+              <div class="av-bubble" id="bubble-organizer">thinking…</div>
+            </div>
+            <div class="avatar-seat" id="av-quiz" style="--angle:240deg;--c:#ff9f43">
+              <div class="av-glow"></div>
+              <div class="av-body">🎯</div>
+              <div class="av-name">Quinn</div>
+              <div class="av-bubble" id="bubble-quiz">thinking…</div>
+            </div>
+            <!-- You avatar with Camera -->
+            <div class="avatar-seat you-seat" style="--angle:300deg;--c:#a78bfa">
+              <video id="user-video" autoplay muted playsinline></video>
+              <div class="av-body">👤</div>
+              <div class="av-name"><span id="user-name-label">You</span> <span id="emotion-debug" style="font-size:8px;opacity:0.6;margin-left:4px"></span></div>
+            </div>
+          </div>
+          <!-- Nova standalone card -->
+          <div class="nova-seat">
+            <div class="av-body">📝</div>
+            <div>
+              <div class="av-name" style="position:static;background:none;box-shadow:none;padding:0;">Nova</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Summarizer — always listening</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHAT PANEL -->
+        <div class="chat-panel panel-glass">
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-input-wrap">
+            <div class="chat-input-row">
+              <textarea id="chat-input" placeholder="Type your answer, question or explanation..." rows="1"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();App.sendMessage();}"></textarea>
+              <button class="mic-btn" id="mic-btn" onclick="Voice.toggleListening()" title="Hold to Speak">
+                🎤
+              </button>
+              <button id="send-btn" class="send-btn" onclick="App.sendMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+            <div class="input-hints">
+              <span onclick="App.sendMessage('🧪 Ask me to explain')">🧪 Ask me to explain</span>
+              <span onclick="App.sendMessage('🎯 Quiz me')">🎯 Quiz me</span>
+              <span onclick="App.sendMessage('📋 Summarize so far')">📋 Summarize so far</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="room-sidebar panel-glass">
+          <div class="sb-label">Session Progress</div>
+          <div class="progress-ring-wrap">
+            <svg viewBox="0 0 120 120" width="120" height="120">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#1f2038" stroke-width="8"/>
+              <circle id="mastery-arc" cx="60" cy="60" r="50" fill="none" stroke="#7c6fff" stroke-width="8"
+                stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"
+                transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="pr-center">
+              <div class="pr-val" id="mastery-pct">0%</div>
+              <div class="pr-lbl">Mastery</div>
+            </div>
+          </div>
+
+          <div class="stat-row"><span>Questions answered</span><strong id="stat-q">0</strong></div>
+          <div class="stat-row"><span>Quiz score</span><strong id="stat-score">—</strong></div>
+          <div class="stat-row"><span>Current mode</span><strong id="stat-mode">Normal</strong></div>
+
+          <div class="sb-label" style="margin-top:32px;">Active Agents</div>
+          <div class="agent-list" id="agent-list">
+            <div class="al-item" id="al-genius"><div class="al-dot" style="background:#7c6fff;box-shadow:0 0 10px #7c6fff"></div><div class="al-name">🧠 Alex</div><div class="al-role">Genius</div></div>
+            <div class="al-item" id="al-confused"><div class="al-dot" style="background:#43e8b0;box-shadow:0 0 10px #43e8b0"></div><div class="al-name">🤔 Sam</div><div class="al-role">Confused</div></div>
+            <div class="al-item" id="al-skeptic"><div class="al-dot" style="background:#ff6b9d;box-shadow:0 0 10px #ff6b9d"></div><div class="al-name">🧐 Jordan</div><div class="al-role">Skeptic</div></div>
+            <div class="al-item" id="al-organizer"><div class="al-dot" style="background:#ffc54d;box-shadow:0 0 10px #ffc54d"></div><div class="al-name">📋 Maya</div><div class="al-role">Organizer</div></div>
+            <div class="al-item" id="al-quiz"><div class="al-dot" style="background:#ff9f43;box-shadow:0 0 10px #ff9f43"></div><div class="al-name">🎯 Quinn</div><div class="al-role">Quiz Master</div></div>
+            <div class="al-item" id="al-summarizer"><div class="al-dot" style="background:#64d9ff;box-shadow:0 0 10px #64d9ff"></div><div class="al-name">📝 Nova</div><div class="al-role">Summarizer</div></div>
+          </div>
+
+          <div class="sb-label" style="margin-top:32px;">Session Log</div>
+          <div class="session-log" id="session-log"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+  <script src="src/utils/state.js"></script>
+  <script src="src/utils/pdf.js"></script>
+  <script src="src/agents/prompts.js"></script>
+  <script src="src/agents/api.js"></script>
+  <script src="src/components/camera.js"></script>
+  <script src="src/components/voice.js"></script>
+  <script src="src/components/avatars.js"></script>
+  <script src="src/components/chat.js"></script>
+  <script src="src/components/feynman.js"></script>
+  <script src="src/components/adaptive.js"></script>
+  <script src="src/components/pomodoro.js"></script>
+  <script src="src/components/scoring.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
