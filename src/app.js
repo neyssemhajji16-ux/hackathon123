@@ -50,20 +50,27 @@ const App = {
   async startSession() {
     const apiKeyInput = document.getElementById('api-key-input');
     const nameInput = document.getElementById('name-input');
+    const studyInput = document.getElementById('study-time-input');
+    const breakInput = document.getElementById('break-time-input');
+
     const apiKey = apiKeyInput ? apiKeyInput.value.trim() : State.get('apiKey');
     const topic = document.getElementById('topic-input').value.trim();
     const sName = nameInput ? nameInput.value.trim() : 'Student';
     const errEl = document.getElementById('setup-error');
+    
+    const studyMins = studyInput ? parseInt(studyInput.value) || 25 : 25;
+    const breakMins = breakInput ? parseInt(breakInput.value) || 5 : 5;
 
     errEl.style.display = 'none';
 
-    if (!apiKey) { errEl.textContent = '⚠ Please enter your Mistral API key'; errEl.style.display = 'block'; return; }
     if (!topic) { errEl.textContent = '⚠ Please enter a study topic'; errEl.style.display = 'block'; return; }
 
+    State.reset();
     State.set('apiKey', apiKey);
     State.set('topic', topic);
+    State.set('studyDuration', studyMins);
+    State.set('breakDuration', breakMins);
     if (sName) State.set('studentName', sName);
-    State.reset();
 
     // Get active agents from toggles
     const activeAgents = [];
@@ -79,6 +86,7 @@ const App = {
 
     Avatars.buildAgentList(activeAgents);
     Chat.clearMessages();
+    Pomodoro.reset(); // Force timer to use newly set custom durations
 
     this.showRoom();
     this._openSession(topic, activeAgents);
@@ -137,6 +145,12 @@ const App = {
     Chat.addMessage('user', text);
     State.addToHistory('user', text);
     State.incrementStats();
+    
+    // Increment mastery slightly for participation
+    if (State.get('mode') !== 'deep') {
+      State.updateMastery(Math.min(100, State.get('mastery') + 1.5));
+    }
+    
     Feynman.hide();
 
     // Handle special states
@@ -150,9 +164,10 @@ const App = {
       State.set('waitingForQuiz', false);
       // Quiz master evaluates the answer
       Chat.queueAgentAPI('quiz');
-      // Then check for struggle
+      // Then check for struggle to determine if quiz was right
       setTimeout(async () => {
-        await Adaptive.checkStruggle(text);
+        const isStruggling = await Adaptive.checkStruggle(text);
+        State.updateQuizStats(!isStruggling); // Update quiz score
         Adaptive.checkRevertMode();
       }, 3000);
       this._sending = false;
@@ -280,8 +295,7 @@ const App = {
         ['genius'],                       // Just Alex explaining
         ['genius', 'confused'],           // Alex explains, Sam asks a follow-up
         ['genius', 'skeptic'],            // Alex explains, Jordan challenges
-        ['confused', 'genius'],           // Sam asks, Alex answers
-        ['organizer', 'genius']           // Maya organizes, Alex starts
+        ['confused', 'genius']            // Sam asks, Alex answers
       ];
       const pick = discussions[Math.floor(Math.random() * discussions.length)];
       sequence = pick.filter(a => activeAgents.includes(a));
@@ -425,5 +439,10 @@ document.addEventListener('DOMContentLoaded', () => {
         App.handleFileUpload({ target: { files: [file] } });
       }
     });
+  }
+
+  // Request Notification Permissions
+  if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+    Notification.requestPermission();
   }
 });

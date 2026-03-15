@@ -124,7 +124,8 @@ const Chat = {
           item.emotionScript
         );
       } catch (e) {
-        text = `[${AGENTS[item.agentKey].name} is thinking... API error: ${e.message}]`;
+        console.error('API Error:', e);
+        text = `Oops, my connection to the Mistral API just dropped! Let me try to gather my thoughts... (${e.message})`;
       }
     }
 
@@ -138,6 +139,14 @@ const Chat = {
       
       // Speak the response using Text-to-Speech and WAIT for it to finish
       await Voice.speak(item.agentKey, text);
+
+      // If the agent asked a direct question, STOP the rest of the queue
+      // so the user has time to answer it before another agent jumps in.
+      // Exception: Ignore if the organizer is just kicking off the session.
+      if (text.trim().endsWith('?') && item.agentKey !== 'organizer') {
+        this._queue = []; // Clear remaining agents
+        State.log(`Queue stopped because ${AGENTS[item.agentKey].name} asked a question.`);
+      }
     }
 
     await this._sleep(400);

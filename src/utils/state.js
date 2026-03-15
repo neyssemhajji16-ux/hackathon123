@@ -7,6 +7,8 @@ const State = {
     pdfContext: null,
     pdfFilename: null,
     mode: 'normal', // 'normal' | 'deep'
+    studyDuration: 25,
+    breakDuration: 5,
     conversationHistory: [],
     streak: 0,
     questionsAnswered: 0,
@@ -58,10 +60,10 @@ const State = {
   updateMastery(score) {
     this._data.mastery = score;
     const arc = document.getElementById('mastery-arc');
-    const val = document.getElementById('mastery-val');
+    const val = document.getElementById('mastery-pct'); // Fixed ID
     const scoreDisplay = document.getElementById('score-display');
     if (arc) {
-      const offset = 201 * (1 - score / 100);
+      const offset = 314 * (1 - score / 100); // Fixed circumference to 314
       arc.style.strokeDashoffset = offset;
     }
     if (val) val.textContent = `${Math.round(score)}%`;
@@ -89,7 +91,7 @@ const State = {
     this._data.quizTotal++;
     if (correct) this._data.quizCorrect++;
     const pct = Math.round((this._data.quizCorrect / this._data.quizTotal) * 100);
-    const el = document.getElementById('stat-quiz');
+    const el = document.getElementById('stat-score'); // Fixed ID
     if (el) el.textContent = `${pct}%`;
     // Update mastery based on quiz performance
     const newMastery = Math.min(100, (State.get('mastery') + (correct ? 8 : -3)));
@@ -100,6 +102,8 @@ const State = {
     this._data = {
       ...this._data,
       mode: 'normal',
+      studyDuration: 25,
+      breakDuration: 5,
       conversationHistory: [],
       streak: 0,
       questionsAnswered: 0,

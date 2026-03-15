@@ -68,8 +68,22 @@
         </div>
         <div class="setup-form">
           <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="name-input" placeholder="e.g. Alex, Sarah..." />
+          </div>
+          <div class="form-group">
             <label>Study Topic <span class="req">*</span></label>
             <input type="text" id="topic-input" placeholder="e.g. Photosynthesis, Binary Search, World War I..." />
+          </div>
+          <div class="form-group" style="display:flex;gap:16px;">
+            <div style="flex:1;">
+              <label>Study Time (min)</label>
+              <input type="number" id="study-time-input" value="25" min="5" max="120" />
+            </div>
+            <div style="flex:1;">
+              <label>Break Time (min)</label>
+              <input type="number" id="break-time-input" value="5" min="1" max="30" />
+            </div>
           </div>
           <div class="form-group">
             <label>Upload Lecture Notes <span class="opt">(optional but recommended)</span></label>
@@ -113,7 +127,7 @@
         <div class="rh-center">
           <div class="pomo-timer" id="pomo-display" onclick="Pomodoro.toggle()">
             <svg width="36" height="36" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="15" fill="none" stroke="#1f2038" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(15,23,42,0.1)" stroke-width="3"/>
               <circle id="pomo-arc" cx="18" cy="18" r="15" fill="none" stroke="#7c6fff" stroke-width="3"
                 stroke-dasharray="94.2" stroke-dashoffset="0" stroke-linecap="round"
                 transform="rotate(-90 18 18)"/>
@@ -214,7 +228,7 @@
           <div class="sb-label">Session Progress</div>
           <div class="progress-ring-wrap">
             <svg viewBox="0 0 120 120" width="120" height="120">
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#1f2038" stroke-width="8"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(15,23,42,0.1)" stroke-width="8"/>
               <circle id="mastery-arc" cx="60" cy="60" r="50" fill="none" stroke="#7c6fff" stroke-width="8"
                 stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"
                 transform="rotate(-90 60 60)"/>
@@ -244,6 +258,16 @@
         </div>
       </div>
     </div>
+    <!-- END SESSION MODAL -->
+    <div id="end-modal" class="modal-overlay" style="display:none;">
+      <div class="modal-box">
+        <h2 class="modal-title">Session Complete</h2>
+        <div class="modal-score" id="modal-score">0%</div>
+        <p class="modal-feedback" id="modal-feedback">Evaluating...</p>
+        <div class="modal-stats" id="modal-stats"></div>
+        <button class="cta-btn" onclick="App.newSession()">Start New Session</button>
+      </div>
+    </div>
 
   </div>
 
@@ -259,7 +283,6 @@
   <script src="src/components/feynman.js"></script>
   <script src="src/components/adaptive.js"></script>
   <script src="src/components/pomodoro.js"></script>
-  <script src="src/components/scoring.js"></script>
   <script src="src/app.js"></script>
 </body>
 </html>
